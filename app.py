@@ -426,7 +426,7 @@ st.markdown("""
         100% { background-position: 0% 50%; }
     }
     .gradient-title {
-        font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif !important;
+        font-family: 'Space Grotesk', 'Outfit', system-ui, sans-serif !important;
         font-size: 4.2rem !important;
         font-weight: 800 !important;
         background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan), var(--accent-pink), var(--accent-blue), var(--accent-purple)) !important;
@@ -549,7 +549,7 @@ st.sidebar.markdown('''
         background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         margin: 0; letter-spacing: -0.02em; line-height: 1.1;">DataCleanAgent</h2>
-    <p style="color: #5C6370; font-size: 0.7rem; margin: 6px 0 0 0; letter-spacing: 0.06em; text-transform: uppercase; font-family: 'Outfit'; font-weight: 600;">AI Data Intelligence Platform</p>
+    <p style="color: #8E9AA8; font-size: 0.7rem; margin: 6px 0 0 0; letter-spacing: 0.06em; text-transform: uppercase; font-family: 'Outfit'; font-weight: 600;">AI Data Intelligence Platform</p>
 </div>
 ''', unsafe_allow_html=True)
 st.sidebar.markdown("---")
@@ -742,19 +742,19 @@ if st.session_state.df is not None:
     st.sidebar.markdown(f'''
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;">
         <div class="stat-card" style="padding:10px;">
-            <div style="color:#5C6370; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Rows</div>
+            <div style="color:#8E9AA8; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Rows</div>
             <div style="color:#7C6BF0; font-size:1.15rem; font-weight:700; margin-top:2px;">{_r:,}</div>
         </div>
         <div class="stat-card" style="padding:10px;">
-            <div style="color:#5C6370; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Columns</div>
+            <div style="color:#8E9AA8; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Columns</div>
             <div style="color:#00D4C8; font-size:1.15rem; font-weight:700; margin-top:2px;">{_c}</div>
         </div>
     </div>
     <div class="stat-card" style="padding:10px;">
-        <div style="color:#5C6370; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Missing Cells</div>
+        <div style="color:#8E9AA8; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Missing Cells</div>
         <div style="display:flex; align-items:baseline; gap:6px; margin-top:2px;">
             <span style="color:#F97794; font-size:1.15rem; font-weight:700;">{_nulls:,}</span>
-            <span style="color:#5C6370; font-size:0.75rem;">({_null_pct:.1f}%)</span>
+            <span style="color:#8E9AA8; font-size:0.75rem;">({_null_pct:.1f}%)</span>
         </div>
     </div>
     ''', unsafe_allow_html=True)
@@ -764,7 +764,7 @@ if st.session_state.df is not None:
         _sc = score_color(_s)
         st.sidebar.markdown(f'''
         <div class="stat-card" style="padding:12px; margin-top:6px; border-left:3px solid {_sc};">
-            <div style="color:#5C6370; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Quality Score</div>
+            <div style="color:#8E9AA8; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Quality Score</div>
             <div style="color:{_sc}; font-size:1.5rem; font-weight:800; margin-top:2px;">{_s:.1f}%</div>
             <div style="background:#1A1F2B; border-radius:4px; height:4px; overflow:hidden; margin-top:6px;">
                 <div style="width:{_s}%; height:100%; background:linear-gradient(90deg, {_sc}, {_sc}88); border-radius:4px;"></div>
@@ -807,7 +807,7 @@ if st.session_state.df is None:
 
     # Feature cards
     st.markdown('<div style="height:32px;"></div>', unsafe_allow_html=True)
-    cols = st.columns(3)
+    cols = st.columns(2)
     features = [
         ('\U0001f52c', 'Deep Profiling', 'Statistical analysis across 6 quality dimensions with IQR, Z-score, Isolation Forest outlier detection, and fuzzy string matching.', '#7C6BF0', 'ISO 25012-inspired'),
         ('\U0001f916', 'AI Cleaning Agent', 'Autonomous ReAct pipeline with self-healing code generation. Gemini analyzes issues, writes pandas transformations, validates results.', '#00D4C8', 'Powered by Gemini 2.5'),
@@ -876,9 +876,9 @@ else:
         sc = score_color(sv)
         st.markdown(f'''
         <div class="glass-card score-hero" style="text-align:center; border: 1px solid {sc}22; box-shadow: 0 0 40px {sc}10; margin-bottom: 28px; padding: 32px 20px;">
-            <p style="color: #5C6370; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; font-weight: 600;">Overall Data Quality Score</p>
-            <div style="font-size: 4.5rem; color: {sc}; font-family: 'Inter'; font-weight: 900; margin: 0; line-height: 1; letter-spacing: -0.03em;">{sv:.1f}<span style="font-size:2rem; opacity:0.7;">%</span></div>
-            <p style="color: #5C6370; font-size: 0.75rem; margin-top: 8px;">Weighted harmonic mean across 6 quality dimensions</p>
+            <p style="color: #8E9AA8; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; font-weight: 600;">Overall Data Quality Score</p>
+            <div style="font-size: 4.5rem; color: {sc}; font-family: 'Outfit'; font-weight: 900; margin: 0; line-height: 1; letter-spacing: -0.03em;">{sv:.1f}<span style="font-size:2rem; opacity:0.7;">%</span></div>
+            <p style="color: #8E9AA8; font-size: 0.75rem; margin-top: 8px;">Weighted harmonic mean across 6 quality dimensions</p>
             <div style="max-width:300px; margin:12px auto 0 auto; background:#1A1F2B; border-radius:6px; height:6px; overflow:hidden;">
                 <div style="width:{sv}%; height:100%; background:linear-gradient(90deg, {sc}, {sc}AA); border-radius:6px; transition: width 1s ease;"></div>
             </div>
@@ -897,8 +897,8 @@ else:
             dims = profile["dimension_scores"]
             dim_names = list(dims.keys())
 
-            for row_start in range(0, len(dim_names), 3):
-                row_cols = st.columns(3)
+            for row_start in range(0, len(dim_names), 2):
+                row_cols = st.columns(2)
                 for idx, col in enumerate(row_cols):
                     dim_idx = row_start + idx
                     if dim_idx < len(dim_names):
@@ -913,8 +913,8 @@ else:
                                 <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
                                     <div class="dim-icon" style="background:{dc}12; border:1px solid {dc}25;">{di}</div>
                                     <div>
-                                        <div style="color:#5C6370; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">{name}</div>
-                                        <div style="color:{vc}; font-size:1.6rem; font-weight:800; font-family:'Inter'; line-height:1.1; margin-top:2px;">{val:.1f}%</div>
+                                        <div style="color:#8E9AA8; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">{name}</div>
+                                        <div style="color:{vc}; font-size:1.6rem; font-weight:800; font-family:'Outfit'; line-height:1.1; margin-top:2px;">{val:.1f}%</div>
                                     </div>
                                 </div>
                                 <div style="background:#1A1F2B; border-radius:4px; height:5px; overflow:hidden;">
@@ -944,13 +944,13 @@ else:
             fig_radar.update_layout(
                 polar=dict(
                     bgcolor='rgba(0,0,0,0)',
-                    radialaxis=dict(visible=True, range=[0, 100], tickfont=dict(size=8, color='#5C6370'), gridcolor='rgba(255,255,255,0.04)', linecolor='rgba(255,255,255,0.04)'),
+                    radialaxis=dict(visible=True, range=[0, 100], tickfont=dict(size=8, color='#8E9AA8'), gridcolor='rgba(255,255,255,0.04)', linecolor='rgba(255,255,255,0.04)'),
                     angularaxis=dict(tickfont=dict(size=10, color='#C8CDD5'), gridcolor='rgba(255,255,255,0.06)', linecolor='rgba(255,255,255,0.06)')
                 ),
                 showlegend=False, height=340,
                 margin=dict(t=20, b=20, l=45, r=45),
                 paper_bgcolor='rgba(0,0,0,0)',
-                font=dict(family='Inter, system-ui', color='#C8CDD5')
+                font=dict(family='Outfit, system-ui', color='#C8CDD5')
             )
             st.plotly_chart(fig_radar, use_container_width=True)
 
@@ -1002,7 +1002,7 @@ else:
             </div>''', unsafe_allow_html=True)
 
             for rec in recs[:10]:
-                pc = {'High': '#FF7675', 'Medium': '#FFC048', 'Low': '#5C6370'}.get(rec.get('priority', 'Low'), '#5C6370')
+                pc = {'High': '#FF7675', 'Medium': '#FFC048', 'Low': '#8E9AA8'}.get(rec.get('priority', 'Low'), '#8E9AA8')
                 bc = {'High': 'high', 'Medium': 'medium', 'Low': 'low'}.get(rec.get('priority', 'Low'), 'low')
                 st.markdown(f'''
                 <div class="glass-card" style="padding:12px 16px; margin-bottom:8px; border-left:3px solid {pc};">
@@ -1014,7 +1014,7 @@ else:
                         </div>
                         <span class="badge badge-{bc}">{rec.get('priority', 'Low')}</span>
                     </div>
-                    <p style="color:#5C6370; font-size:0.78rem; margin:4px 0 0 36px;">{rec.get('reason', '')}</p>
+                    <p style="color:#8E9AA8; font-size:0.78rem; margin:4px 0 0 36px;">{rec.get('reason', '')}</p>
                 </div>
                 ''', unsafe_allow_html=True)
             st.markdown("<hr>", unsafe_allow_html=True)
@@ -1048,8 +1048,8 @@ else:
                 coloraxis_showscale=False, height=300,
                 margin=dict(t=6, b=6, l=6, r=6),
                 paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='#0F1219',
-                font=dict(family='Inter', color='#8B92A0'),
-                xaxis=dict(color='#5C6370', showticklabels=False), yaxis=dict(color='#8B92A0')
+                font=dict(family='Outfit', color='#8B92A0'),
+                xaxis=dict(color='#8E9AA8', showticklabels=False), yaxis=dict(color='#8B92A0')
             )
             st.plotly_chart(fig_heat, use_container_width=True)
 
@@ -1068,7 +1068,7 @@ else:
                         sev_icon = {
                             'High': '<span style="color:#FF7675;">\u25cf</span>',
                             'Medium': '<span style="color:#FFC048;">\u25cf</span>',
-                            'Low': '<span style="color:#5C6370;">\u25cf</span>'
+                            'Low': '<span style="color:#8E9AA8;">\u25cf</span>'
                         }.get(iss['severity'], '')
                         bc = {'High':'high','Medium':'medium','Low':'low'}.get(iss['severity'],'low')
                         st.markdown(f'''<div style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
@@ -1092,12 +1092,12 @@ else:
                 with cl:
                     st.markdown(f'''
                     <div class="glass-card" style="padding:14px;">
-                        <div style="color:#5C6370; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px; font-weight:600;">Column Diagnostics</div>
+                        <div style="color:#8E9AA8; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px; font-weight:600;">Column Diagnostics</div>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                            <div><span style="color:#5C6370; font-size:0.75rem;">Type:</span><br><strong style="color:var(--text-primary); font-size:0.85rem;">{col_info['dtype']}</strong></div>
-                            <div><span style="color:#5C6370; font-size:0.75rem;">Inferred:</span><br><strong style="color:#00D4C8; font-size:0.85rem;">{col_info['inferred_type']}</strong></div>
-                            <div><span style="color:#5C6370; font-size:0.75rem;">Unique:</span><br><strong style="color:var(--text-primary); font-size:0.85rem;">{col_info['unique_count']}</strong></div>
-                            <div><span style="color:#5C6370; font-size:0.75rem;">Nulls:</span><br><strong style="color:#F97794; font-size:0.85rem;">{col_info['null_count']} ({col_info['null_pct']:.1f}%)</strong></div>
+                            <div><span style="color:#8E9AA8; font-size:0.75rem;">Type:</span><br><strong style="color:var(--text-primary); font-size:0.85rem;">{col_info['dtype']}</strong></div>
+                            <div><span style="color:#8E9AA8; font-size:0.75rem;">Inferred:</span><br><strong style="color:#00D4C8; font-size:0.85rem;">{col_info['inferred_type']}</strong></div>
+                            <div><span style="color:#8E9AA8; font-size:0.75rem;">Unique:</span><br><strong style="color:var(--text-primary); font-size:0.85rem;">{col_info['unique_count']}</strong></div>
+                            <div><span style="color:#8E9AA8; font-size:0.75rem;">Nulls:</span><br><strong style="color:#F97794; font-size:0.85rem;">{col_info['null_count']} ({col_info['null_pct']:.1f}%)</strong></div>
                         </div>
                     </div>
                     ''', unsafe_allow_html=True)
@@ -1106,12 +1106,12 @@ else:
                         st.markdown(f'''
                         <div class="glass-card" style="padding:14px; margin-top:8px;">
                             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-                                <div><span style="color:#5C6370; font-size:0.7rem;">Mean</span><br><strong style="color:var(--text-primary);">{col_info.get('mean',0):.2f}</strong></div>
-                                <div><span style="color:#5C6370; font-size:0.7rem;">Median</span><br><strong style="color:var(--text-primary);">{col_info.get('median',0):.2f}</strong></div>
-                                <div><span style="color:#5C6370; font-size:0.7rem;">Std</span><br><strong style="color:var(--text-primary);">{col_info.get('std',0):.2f}</strong></div>
-                                <div><span style="color:#5C6370; font-size:0.7rem;">Min</span><br><strong style="color:var(--text-primary);">{col_info.get('min',0):.2f}</strong></div>
-                                <div><span style="color:#5C6370; font-size:0.7rem;">Max</span><br><strong style="color:var(--text-primary);">{col_info.get('max',0):.2f}</strong></div>
-                                <div><span style="color:#5C6370; font-size:0.7rem;">Outliers</span><br><strong style="color:#FFC048;">{col_info.get('outliers_count',0)}</strong></div>
+                                <div><span style="color:#8E9AA8; font-size:0.7rem;">Mean</span><br><strong style="color:var(--text-primary);">{col_info.get('mean',0):.2f}</strong></div>
+                                <div><span style="color:#8E9AA8; font-size:0.7rem;">Median</span><br><strong style="color:var(--text-primary);">{col_info.get('median',0):.2f}</strong></div>
+                                <div><span style="color:#8E9AA8; font-size:0.7rem;">Std</span><br><strong style="color:var(--text-primary);">{col_info.get('std',0):.2f}</strong></div>
+                                <div><span style="color:#8E9AA8; font-size:0.7rem;">Min</span><br><strong style="color:var(--text-primary);">{col_info.get('min',0):.2f}</strong></div>
+                                <div><span style="color:#8E9AA8; font-size:0.7rem;">Max</span><br><strong style="color:var(--text-primary);">{col_info.get('max',0):.2f}</strong></div>
+                                <div><span style="color:#8E9AA8; font-size:0.7rem;">Outliers</span><br><strong style="color:#FFC048;">{col_info.get('outliers_count',0)}</strong></div>
                             </div>
                         </div>
                         ''', unsafe_allow_html=True)
@@ -1156,7 +1156,7 @@ else:
                 with col_rollback:
                     rollback_btn = st.button("↩️ Rollback", disabled=st.session_state.agent_running or not st.session_state.action_log, use_container_width=True)
                 with col_info:
-                    st.markdown(f'<p style="color:#5C6370; font-size:0.78rem; margin-top:8px;">Mode: <strong style="color:#7C6BF0;">{agent_mode.upper()}</strong> \u2022 Max steps: <strong style="color:#00D4C8;">{max_steps}</strong></p>', unsafe_allow_html=True)
+                    st.markdown(f'<p style="color:#8E9AA8; font-size:0.78rem; margin-top:8px;">Mode: <strong style="color:#7C6BF0;">{agent_mode.upper()}</strong> \u2022 Max steps: <strong style="color:#00D4C8;">{max_steps}</strong></p>', unsafe_allow_html=True)
 
                 if rollback_btn:
                     with st.spinner("Rolling back last action..."):
@@ -1207,8 +1207,8 @@ else:
                     <div style="width:11px; height:11px; border-radius:50%; background:#FF7675;"></div>
                     <div style="width:11px; height:11px; border-radius:50%; background:#FFC048;"></div>
                     <div style="width:11px; height:11px; border-radius:50%; background:#0BE881;"></div>
-                    <span style="color:#5C6370; font-family:'JetBrains Mono', monospace; font-size:0.72rem; margin-left:12px;">dataclean-agent \u2014 {agent_mode}</span>
-                    <span style="margin-left:auto; color:#5C6370; font-family:'JetBrains Mono', monospace; font-size:0.68rem;">\u25cf live</span>
+                    <span style="color:#8E9AA8; font-family:'JetBrains Mono', monospace; font-size:0.72rem; margin-left:12px;">dataclean-agent \u2014 {agent_mode}</span>
+                    <span style="margin-left:auto; color:#8E9AA8; font-family:'JetBrains Mono', monospace; font-size:0.68rem;">\u25cf live</span>
                 </div>
                 ''', unsafe_allow_html=True)
 
@@ -1243,19 +1243,19 @@ else:
                     stats_placeholder.markdown(f'''
                     <div style="display:flex; gap:1px; background:rgba(255,255,255,0.04); border-radius:0 0 14px 14px; overflow:hidden; border:1px solid rgba(255,255,255,0.06); border-top:none;">
                         <div style="flex:1; padding:12px 16px; background:#151921;">
-                            <div style="color:#5C6370; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Steps</div>
+                            <div style="color:#8E9AA8; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Steps</div>
                             <div style="color:#7C6BF0; font-size:1.1rem; font-weight:700;">{sd}</div>
                         </div>
                         <div style="flex:1; padding:12px 16px; background:#151921;">
-                            <div style="color:#5C6370; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Success</div>
+                            <div style="color:#8E9AA8; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Success</div>
                             <div style="color:#0BE881; font-size:1.1rem; font-weight:700;">{sd - sf}</div>
                         </div>
                         <div style="flex:1; padding:12px 16px; background:#151921;">
-                            <div style="color:#5C6370; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Failed</div>
+                            <div style="color:#8E9AA8; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Failed</div>
                             <div style="color:#FF7675; font-size:1.1rem; font-weight:700;">{sf}</div>
                         </div>
                         <div style="flex:1; padding:12px 16px; background:#151921;">
-                            <div style="color:#5C6370; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Status</div>
+                            <div style="color:#8E9AA8; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em;">Status</div>
                             <div style="color:#0BE881; font-size:1.1rem; font-weight:700;">Done</div>
                         </div>
                     </div>
@@ -1396,15 +1396,15 @@ else:
                 bc = score_color(comp['overall_before'])
                 st.markdown(f'''
                 <div class="glass-card" style="text-align:center; padding:20px 12px; border-top:2px solid {bc};">
-                    <div style="color:#5C6370; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">Before</div>
-                    <div style="color:{bc}; font-size:2.2rem; font-weight:800; font-family:'Inter'; line-height:1.2; margin-top:4px;">{comp['overall_before']:.1f}%</div>
+                    <div style="color:#8E9AA8; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">Before</div>
+                    <div style="color:{bc}; font-size:2.2rem; font-weight:800; font-family:'Outfit'; line-height:1.2; margin-top:4px;">{comp['overall_before']:.1f}%</div>
                 </div>''', unsafe_allow_html=True)
             with c2:
                 ac = score_color(comp['overall_after'])
                 st.markdown(f'''
                 <div class="glass-card" style="text-align:center; padding:20px 12px; border-top:2px solid {ac};">
-                    <div style="color:#5C6370; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">After</div>
-                    <div style="color:{ac}; font-size:2.2rem; font-weight:800; font-family:'Inter'; line-height:1.2; margin-top:4px;">{comp['overall_after']:.1f}%</div>
+                    <div style="color:#8E9AA8; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">After</div>
+                    <div style="color:{ac}; font-size:2.2rem; font-weight:800; font-family:'Outfit'; line-height:1.2; margin-top:4px;">{comp['overall_after']:.1f}%</div>
                 </div>''', unsafe_allow_html=True)
             with c3:
                 delta = comp['overall_delta']
@@ -1412,15 +1412,15 @@ else:
                 sign = '+' if delta >= 0 else ''
                 st.markdown(f'''
                 <div class="glass-card" style="text-align:center; padding:20px 12px; border-top:2px solid {dc};">
-                    <div style="color:#5C6370; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">Improvement</div>
-                    <div style="color:{dc}; font-size:2.2rem; font-weight:800; font-family:'Inter'; line-height:1.2; margin-top:4px;">{sign}{delta:.1f}%</div>
+                    <div style="color:#8E9AA8; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">Improvement</div>
+                    <div style="color:{dc}; font-size:2.2rem; font-weight:800; font-family:'Outfit'; line-height:1.2; margin-top:4px;">{sign}{delta:.1f}%</div>
                 </div>''', unsafe_allow_html=True)
             with c4:
                 nr = comp['summary_before']['total_nulls'] - comp['summary_after']['total_nulls']
                 st.markdown(f'''
                 <div class="glass-card" style="text-align:center; padding:20px 12px; border-top:2px solid #F97794;">
-                    <div style="color:#5C6370; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">Nulls Fixed</div>
-                    <div style="color:#F97794; font-size:2.2rem; font-weight:800; font-family:'Inter'; line-height:1.2; margin-top:4px;">{nr:,}</div>
+                    <div style="color:#8E9AA8; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">Nulls Fixed</div>
+                    <div style="color:#F97794; font-size:2.2rem; font-weight:800; font-family:'Outfit'; line-height:1.2; margin-top:4px;">{nr:,}</div>
                 </div>''', unsafe_allow_html=True)
             st.markdown("<hr>", unsafe_allow_html=True)
 
@@ -1433,7 +1433,7 @@ else:
                 domain = {'x': [0, 1], 'y': [0, 1]},
                 delta = {'reference': comp['overall_before'], 'increasing': {'color': "#0BE881"}, 'decreasing': {'color': "#FF7675"}},
                 gauge = {
-                    'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "#5C6370", 'tickfont': {'color': '#5C6370'}},
+                    'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "#8E9AA8", 'tickfont': {'color': '#8E9AA8'}},
                     'bar': {'color': score_color(comp['overall_after'])},
                     'bgcolor': "rgba(0,0,0,0)",
                     'borderwidth': 1,
@@ -1472,11 +1472,11 @@ else:
                 ))
                 fig_r.update_layout(
                     polar=dict(bgcolor='rgba(0,0,0,0)',
-                        radialaxis=dict(visible=True, range=[0,100], tickfont=dict(size=8, color='#5C6370'), gridcolor='rgba(255,255,255,0.04)'),
+                        radialaxis=dict(visible=True, range=[0,100], tickfont=dict(size=8, color='#8E9AA8'), gridcolor='rgba(255,255,255,0.04)'),
                         angularaxis=dict(tickfont=dict(size=10, color='#C8CDD5'), gridcolor='rgba(255,255,255,0.06)')
                     ),
                     showlegend=True, height=360, margin=dict(t=30,b=20,l=45,r=45),
-                    paper_bgcolor='rgba(0,0,0,0)', font=dict(family='Inter', color='#C8CDD5'),
+                    paper_bgcolor='rgba(0,0,0,0)', font=dict(family='Outfit', color='#C8CDD5'),
                     legend=dict(orientation="h", y=1.08, x=0.5, xanchor='center', font=dict(color='#C8CDD5', size=11))
                 )
                 st.plotly_chart(fig_r, use_container_width=True)
@@ -1524,7 +1524,7 @@ else:
                                 <strong style="color:var(--text-primary); font-size:0.85rem;">{action.get('justification', 'Cleaning step')}</strong>
                                 {status_badge}
                             </div>
-                            <p style="color:#5C6370; font-size:0.75rem; margin:4px 0 0 0;">Shape: {action.get('shape_after', 'N/A')}</p>
+                            <p style="color:#8E9AA8; font-size:0.75rem; margin:4px 0 0 0;">Shape: {action.get('shape_after', 'N/A')}</p>
                         </div>
                     </div>
                     ''', unsafe_allow_html=True)
@@ -1571,15 +1571,15 @@ else:
                     with st.expander(f"{step_label}: {just[:90]}"):
                         st.markdown(f'''
                         <div class="glass-card" style="border-left:3px solid {sc};">
-                            <div style="color:#5C6370; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:600;">Justification</div>
+                            <div style="color:#8E9AA8; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:600;">Justification</div>
                             <p style="color:var(--text-primary); font-size:0.88rem; margin-bottom:14px;">{just}</p>
-                            <div style="color:#5C6370; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:600;">Generated Code</div>
+                            <div style="color:#8E9AA8; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:600;">Generated Code</div>
                             <div class="console-box" style="min-height:auto; max-height:200px; border-radius:8px; font-size:0.78rem;">
                                 <code style="color:#FFC048; font-family:'JetBrains Mono'; white-space:pre-wrap;">{action.get('code', 'N/A')}</code>
                             </div>
                             <div style="display:flex; gap:16px; margin-top:12px;">
-                                <div><span style="color:#5C6370; font-size:0.72rem;">Shape:</span> <strong style="color:#0BE881;">{action.get('shape_after', 'N/A')}</strong></div>
-                                <div><span style="color:#5C6370; font-size:0.72rem;">Status:</span> <strong style="color:{'#FF7675' if is_err else '#0BE881'};">{'Failed' if is_err else 'Success'}</strong></div>
+                                <div><span style="color:#8E9AA8; font-size:0.72rem;">Shape:</span> <strong style="color:#0BE881;">{action.get('shape_after', 'N/A')}</strong></div>
+                                <div><span style="color:#8E9AA8; font-size:0.72rem;">Status:</span> <strong style="color:{'#FF7675' if is_err else '#0BE881'};">{'Failed' if is_err else 'Success'}</strong></div>
                             </div>
                         </div>
                         ''', unsafe_allow_html=True)
@@ -1590,7 +1590,7 @@ else:
             st.markdown('''<div class="section-header"><div class="accent-dot" style="background:#00D4C8;"></div><h3>Export Reports</h3></div>''', unsafe_allow_html=True)
 
             comp = st.session_state.comparison
-            ce1, ce2, ce3 = st.columns(3)
+            ce1, ce2, ce3 = st.columns(2)
             with ce1:
                 metadata = {
                     'overall_before': comp['overall_before'],
