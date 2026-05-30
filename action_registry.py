@@ -787,7 +787,6 @@ def execute_action(action_name: str, df: pd.DataFrame, **kwargs) -> ActionResult
             df=df,
             error_message=f"Precondition validation failed: {err_msg}"
         )
-        
     # 2. Execution in a try-except sandbox
     try:
         modified_df, rows_affected, cols_affected, description = action.execute(df, **kwargs)
@@ -807,3 +806,82 @@ def execute_action(action_name: str, df: pd.DataFrame, **kwargs) -> ActionResult
             error_message=f"Unexpected error executing '{action_name}': {str(e)}",
             description=f"Action execution crashed with error: {str(e)}.\nTraceback:\n{tb}"
         )
+
+# ============================================================
+# LangChain Integration: Tool Schemas
+# ============================================================
+from pydantic import BaseModel, Field
+from typing import List, Optional, Dict, Any
+
+class BaseActionArgs(BaseModel):
+    thought: str = Field(description="Step-by-step reasoning explaining why you are prioritizing this specific data issue and selecting this action.")
+    justification: str = Field(description="A concise, user-friendly statistical justification of the action taken.")
+
+class MedianImputationArgs(BaseActionArgs):
+    column: str = Field(description="The numeric column to impute")
+
+class GroupedMedianImputationArgs(BaseActionArgs):
+    column: str = Field(description="The numeric column to impute")
+    group_cols: List[str] = Field(description="List of columns to group by")
+
+class ModeImputationArgs(BaseActionArgs):
+    column: str = Field(description="The categorical column to impute")
+
+class DropColumnsArgs(BaseActionArgs):
+    columns: Optional[List[str]] = Field(default=None, description="List of columns to drop completely")
+    threshold: Optional[float] = Field(default=None, description="Drop columns with missing percentage above this threshold (0.0 - 1.0)")
+
+class RemoveDuplicatesArgs(BaseActionArgs):
+    subset: Optional[List[str]] = Field(default=None, description="Subset of columns to check for duplicates")
+    keep: str = Field(default="first", description="Which duplicate to keep: 'first', 'last', or 'False'")
+
+class NormalizeCategoriesArgs(BaseActionArgs):
+    column: str = Field(description="The categorical column to normalize")
+    mapping: Optional[Dict[str, str]] = Field(default=None, description="Optional custom mapping dictionary")
+
+class ClampIqrOutliersArgs(BaseActionArgs):
+    column: str = Field(description="The numeric column to clamp")
+    multiplier: float = Field(default=1.5, description="IQR multiplier (usually 1.5 or 3.0)")
+
+class CoerceNumericArgs(BaseActionArgs):
+    column: str = Field(description="The column to coerce to numeric types")
+
+class CoerceBooleanArgs(BaseActionArgs):
+    column: str = Field(description="The column to coerce to boolean (0/1)")
+
+class DropConstantColumnsArgs(BaseActionArgs):
+    pass # No arguments needed
+
+class ClampNegativeValuesArgs(BaseActionArgs):
+    column: str = Field(description="The numeric column where negative values should be set to 0")
+
+class FillPlaceholdersArgs(BaseActionArgs):
+    column: str = Field(description="The column to fill")
+    placeholder: str = Field(description="The static string value to fill nulls with")
+
+class ReplaceInvalidValuesArgs(BaseActionArgs):
+    column: str = Field(description="The column to clean")
+    allowed_values: Optional[List[Any]] = Field(default=None, description="List of exact allowed values")
+    min_val: Optional[float] = Field(default=None, description="Minimum allowed numeric value")
+    max_val: Optional[float] = Field(default=None, description="Maximum allowed numeric value")
+    replace_with: Optional[Any] = Field(default=None, description="Value to replace invalid entries with (default NaN)")
+
+class MarkDoneArgs(BaseActionArgs):
+    pass
+
+ACTION_SCHEMAS = {
+    "median_imputation": MedianImputationArgs,
+    "grouped_median_imputation": GroupedMedianImputationArgs,
+    "mode_imputation": ModeImputationArgs,
+    "drop_columns": DropColumnsArgs,
+    "remove_duplicates": RemoveDuplicatesArgs,
+    "normalize_categories": NormalizeCategoriesArgs,
+    "clamp_iqr_outliers": ClampIqrOutliersArgs,
+    "coerce_numeric": CoerceNumericArgs,
+    "coerce_boolean": CoerceBooleanArgs,
+    "drop_constant_columns": DropConstantColumnsArgs,
+    "clamp_negative_values": ClampNegativeValuesArgs,
+    "fill_placeholders": FillPlaceholdersArgs,
+    "replace_invalid_values": ReplaceInvalidValuesArgs,
+    "mark_done": MarkDoneArgs
+}

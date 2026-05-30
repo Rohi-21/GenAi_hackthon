@@ -5,6 +5,10 @@ import warnings
 from scipy import stats
 from sklearn.ensemble import IsolationForest
 from typing import Dict, Any, List, Tuple
+try:
+    from ydata_profiling import ProfileReport
+except ImportError:
+    ProfileReport = None
 
 # Suppress pandas datetime parsing UserWarnings
 warnings.filterwarnings('ignore', category=UserWarning)
@@ -316,6 +320,15 @@ def profile_dataset(df: pd.DataFrame) -> Dict[str, Any]:
     n_rows, n_cols = df.shape
     total_cells = n_rows * n_cols
     
+    # 0. Run ydata-profiling for metadata extraction
+    ydata_desc = None
+    if ProfileReport is not None:
+        try:
+            report = ProfileReport(df, minimal=True, progress_bar=False)
+            ydata_desc = report.get_description()
+        except Exception:
+            pass
+            
     # 1. Infer Column Types
     col_types = infer_column_types(df)
     num_cols = [c for c, t in col_types.items() if t == 'Numeric']
@@ -331,7 +344,10 @@ def profile_dataset(df: pd.DataFrame) -> Dict[str, Any]:
     
     # 1. COMPLETENESS (Missing values)
     null_matrix = df.isna()
-    total_nulls = null_matrix.sum().sum()
+    if ydata_desc and 'table' in ydata_desc:
+        total_nulls = int(ydata_desc['table'].get('n_cells_missing', null_matrix.sum().sum()))
+    else:
+        total_nulls = int(null_matrix.sum().sum())
     completeness_score = 100.0 * (1.0 - total_nulls / total_cells) if total_cells > 0 else 100.0
     
     # Column-level null counts & issues
@@ -354,7 +370,10 @@ def profile_dataset(df: pd.DataFrame) -> Dict[str, Any]:
     id_cols = [c for c in df.columns if (c.lower() in ['passengerid', 'id', 'uuid', 'index', 'pk', 'key']) or (df[c].dropna().nunique() == len(df) and pd.api.types.is_numeric_dtype(df[c]) and 'name' not in c.lower() and 'ticket' not in c.lower() and len(df) > 5)]
     df_for_dup = df.drop(columns=id_cols) if id_cols else df
     dup_rows_mask = df_for_dup.duplicated(keep='first')
-    dup_rows_count = dup_rows_mask.sum()
+    if ydata_desc and 'table' in ydata_desc:
+        dup_rows_count = int(ydata_desc['table'].get('n_duplicates', dup_rows_mask.sum()))
+    else:
+        dup_rows_count = int(dup_rows_mask.sum())
     uniqueness_score = 100.0 * (1.0 - dup_rows_count / n_rows) if n_rows > 0 else 100.0
     
     if dup_rows_count > 0:
@@ -652,14 +671,21 @@ def profile_dataset(df: pd.DataFrame) -> Dict[str, Any]:
         except Exception:
             pass
             
+    # Add ydata-profiling summary metrics directly for LLM consumption
+    summary_dict = {
+        "rows": int(n_rows),
+        "columns": int(n_cols),
+        "total_cells": int(total_cells),
+        "total_nulls": int(total_nulls),
+        "duplicate_rows": int(dup_rows_count),
+    }
+    
+    if ydata_desc and 'table' in ydata_desc:
+        summary_dict["ydata_types"] = {str(k): int(v) for k, v in ydata_desc['table'].get('types', {}).items()}
+        summary_dict["ydata_memory_size"] = str(ydata_desc['table'].get('memory_size', 'Unknown'))
+        
     result = {
-        "summary": {
-            "rows": int(n_rows),
-            "columns": int(n_cols),
-            "total_cells": int(total_cells),
-            "total_nulls": int(total_nulls),
-            "duplicate_rows": int(dup_rows_count),
-        },
+        "summary": summary_dict,
         "dimension_scores": {
             "Completeness": float(completeness_score),
             "Uniqueness": float(uniqueness_score),
