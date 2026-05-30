@@ -319,15 +319,36 @@ class CategoryNormalizer(CleaningAction):
             val_counts = series.value_counts()
             sorted_vals = val_counts.index.tolist()
             
+            # Group by case-insensitive normalized form to resolve casing first
+            casing_groups = {}
             for val in sorted_vals:
-                if val in visited:
+                norm = val.lower()
+                if norm not in casing_groups:
+                    casing_groups[norm] = []
+                casing_groups[norm].append(val)
+                
+            # For each case-insensitive group, map all members to the dominant casing
+            for norm, members in casing_groups.items():
+                dominant = members[0] # first has highest frequency
+                for m in members:
+                    if m != dominant:
+                        mapping[m] = dominant
+                        
+            # Now run fuzzy matching among the dominant case-insensitive forms
+            dominant_vals = [members[0] for members in casing_groups.values()]
+            for val in dominant_vals:
+                val_norm = val.lower()
+                if val_norm in visited:
                     continue
-                # Find close matches (cutoff = 0.6)
-                matches = difflib.get_close_matches(val, sorted_vals, n=10, cutoff=0.6)
-                for match in matches:
-                    if match not in visited:
-                        mapping[match] = val
-                        visited.add(match)
+                # Find close matches among other dominant values (lowercased)
+                other_norms = [v.lower() for v in dominant_vals if v.lower() not in visited]
+                matches = difflib.get_close_matches(val_norm, other_norms, n=10, cutoff=0.82)
+                for match_norm in matches:
+                    if match_norm not in visited:
+                        # Find the corresponding raw dominant value
+                        match_val = next(v for v in dominant_vals if v.lower() == match_norm)
+                        mapping[match_val] = val
+                        visited.add(match_norm)
                         
             # Apply auto-mapping
             changes = {}
