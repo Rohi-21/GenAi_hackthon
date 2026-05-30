@@ -16,6 +16,7 @@ from sample_data import generate_dirty_titanic, generate_dirty_adult, generate_d
 from profiler import profile_dataset, compare_profiles
 from agent import CleaningAgent
 from report_generator import generate_docx_report
+from action_registry import get_action_python_code
 from validation import TransformationVerifier
 from persistence import SessionStore
 
@@ -1427,9 +1428,36 @@ else:
                     <div style="color:#5C6370; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">Nulls Fixed</div>
                     <div style="color:#F97794; font-size:2.2rem; font-weight:800; font-family:'Inter'; line-height:1.2; margin-top:4px;">{nr:,}</div>
                 </div>''', unsafe_allow_html=True)
-
             st.markdown("<hr>", unsafe_allow_html=True)
 
+            # A.2 Health Score Gauge
+            st.markdown('''<div class="section-header"><div class="accent-dot" style="background:#8B5CF6;"></div><h3>Unified Data Health Score</h3></div>''', unsafe_allow_html=True)
+            
+            fig_gauge = go.Figure(go.Indicator(
+                mode = "gauge+number+delta",
+                value = comp['overall_after'],
+                domain = {'x': [0, 1], 'y': [0, 1]},
+                delta = {'reference': comp['overall_before'], 'increasing': {'color': "#0BE881"}, 'decreasing': {'color': "#FF7675"}},
+                gauge = {
+                    'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "#5C6370", 'tickfont': {'color': '#5C6370'}},
+                    'bar': {'color': score_color(comp['overall_after'])},
+                    'bgcolor': "rgba(0,0,0,0)",
+                    'borderwidth': 1,
+                    'bordercolor': "#2d3340",
+                    'steps': [
+                        {'range': [0, 50], 'color': 'rgba(255, 118, 117, 0.05)'},
+                        {'range': [50, 80], 'color': 'rgba(253, 203, 110, 0.05)'},
+                        {'range': [80, 100], 'color': 'rgba(11, 232, 129, 0.05)'}],
+                    'threshold': {
+                        'line': {'color': "#f8fafc", 'width': 4},
+                        'thickness': 0.75,
+                        'value': comp['overall_after']}
+                }
+            ))
+            fig_gauge.update_layout(height=280, margin=dict(t=30,b=20,l=40,r=40), paper_bgcolor='rgba(0,0,0,0)', font=dict(family='Space Grotesk', color='#C8CDD5', size=18))
+            st.plotly_chart(fig_gauge, use_container_width=True)
+
+            st.markdown("<hr>", unsafe_allow_html=True)
             # B. Dual Radar + Bar
             cr1, cr2 = st.columns(2)
             with cr1:
@@ -1568,7 +1596,7 @@ else:
             st.markdown('''<div class="section-header"><div class="accent-dot" style="background:#00D4C8;"></div><h3>Export Reports</h3></div>''', unsafe_allow_html=True)
 
             comp = st.session_state.comparison
-            ce1, ce2 = st.columns(2)
+            ce1, ce2, ce3 = st.columns(3)
             with ce1:
                 metadata = {
                     'overall_before': comp['overall_before'],
@@ -1579,10 +1607,10 @@ else:
                     'actions': st.session_state.action_log
                 }
                 json_data = json.dumps(metadata, indent=2, default=str)
-                st.download_button('\U0001f4e6 Download JSON Metadata', data=json_data, file_name='cleaning_metadata.json', mime='application/json', use_container_width=True)
+                st.download_button('\U0001f4e6 JSON Metadata', data=json_data, file_name='cleaning_metadata.json', mime='application/json', use_container_width=True)
 
             with ce2:
-                if st.button("\U0001f4c4 Generate DOCX Report", type="primary", use_container_width=True):
+                if st.button("\U0001f4c4 Gen DOCX Report", type="primary", use_container_width=True):
                     with st.spinner("Compiling report..."):
                         try:
                             with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
@@ -1597,10 +1625,37 @@ else:
                                 docx_bytes = f.read()
                             os.unlink(report_path)
                             st.session_state.docx_bytes = docx_bytes
-                            st.success("\u2705 DOCX Report Generated!")
+                            st.success("\u2705 DOCX Generated!")
                         except Exception as e:
                             st.error(f"Error: {str(e)}")
                             st.code(traceback.format_exc())
+
+            with ce3:
+                script_lines = [
+                    "import pandas as pd", 
+                    "import numpy as np", 
+                    "", 
+                    "def clean_data(df: pd.DataFrame) -> pd.DataFrame:",
+                    "    df = df.copy()"
+                ]
+                for action in st.session_state.action_log:
+                    try:
+                        code_snippet = get_action_python_code(action['action_name'], **action.get('action_args', {}))
+                        script_lines.append(f"    # Step {action.get('step', '?')}: {action.get('action_name')}")
+                        for line in code_snippet.strip().split('\\n'):
+                            script_lines.append("    " + line)
+                    except Exception:
+                        script_lines.append("    # Error generating code for " + action.get('action_name', 'unknown'))
+                
+                script_lines.append("    return df")
+                script_lines.append("")
+                script_lines.append("if __name__ == '__main__':")
+                script_lines.append("    # df = pd.read_csv('raw_data.csv')")
+                script_lines.append("    # cleaned_df = clean_data(df)")
+                script_lines.append("    # cleaned_df.to_csv('cleaned_data.csv', index=False)")
+                
+                py_script = "\\n".join(script_lines)
+                st.download_button('\ud83d\udc0d Python Script', data=py_script, file_name='cleaning_script.py', mime='text/plain', use_container_width=True)
 
             if 'docx_bytes' in st.session_state:
                 st.download_button(
