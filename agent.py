@@ -15,10 +15,7 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Any, List, Tuple, Generator, Optional
 
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
-from langchain_core.tools import StructuredTool
-from action_registry import execute_action, get_action_python_code, ACTION_REGISTRY, ACTION_SCHEMAS
+from action_registry import execute_action, get_action_python_code, ACTION_REGISTRY
 
 class CleaningAgent:
     """
@@ -79,71 +76,76 @@ class CleaningAgent:
             return self.df, False, err, result.description or err
 
     def _call_gemini(self) -> Dict[str, Any]:
-        """Helper to make structured API calls to Gemini 2.5 Flash using LangChain tool calling."""
+        """Helper to make structured API calls to Gemini 2.5 Flash."""
         api_key = os.environ.get("GOOGLE_API_KEY")
         if not api_key:
             raise ValueError("GOOGLE_API_KEY environment variable is missing. Please configure it in the sidebar.")
             
-        llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.1, google_api_key=api_key)
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
         
-        tools = []
-        for name, schema in ACTION_SCHEMAS.items():
-            tool = StructuredTool.from_function(
-                func=lambda **kwargs: None,
-                name=name,
-                description=f"Executes {name}",
-                args_schema=schema
-            )
-            tools.append(tool)
-            
-        llm_with_tools = llm.bind_tools(tools)
-        
-        messages = []
+        contents = []
         for msg in self.chat_history:
-            if msg["role"] == "user":
-                messages.append(HumanMessage(content=msg["content"]))
-            elif msg["role"] == "model":
-                if msg.get("tool_calls"):
-                    messages.append(AIMessage(content=msg.get("content", ""), tool_calls=msg["tool_calls"]))
-                else:
-                    messages.append(AIMessage(content=msg.get("content", "")))
-            elif msg["role"] == "tool":
-                messages.append(ToolMessage(content=msg["content"], tool_call_id=msg["tool_call_id"]))
-            elif msg["role"] == "system":
-                messages.append(SystemMessage(content=msg["content"]))
-                
+            contents.append({
+                "role": msg["role"],
+                "parts": [{"text": msg["content"]}]
+            })
+            
+        # Define JSON response schema matching selected actions
+        schema = {
+            "type": "OBJECT",
+            "properties": {
+                "thought": {
+                    "type": "STRING",
+                    "description": "Step-by-step reasoning explaining why you are prioritizing this specific data issue and which registry action matches."
+                },
+                "action_name": {
+                    "type": "STRING",
+                    "enum": list(ACTION_REGISTRY.keys()),
+                    "description": "The exact name of the cleaning action strategy to execute."
+                },
+                "action_args": {
+                    "type": "OBJECT",
+                    "description": "JSON object with keys matching the required arguments for the action. CRITICAL: You must replace placeholder values like 'ColName', 'Col1', 'GrpCol1' with actual column names from the dataset (e.g., {'column': 'Price'} or {'column': 'Age'}). Do NOT output literal string 'column' or 'ColName' as the column value."
+                },
+                "justification": {
+                    "type": "STRING",
+                    "description": "A concise, user-friendly statistical justification of the action taken."
+                },
+                "status": {
+                    "type": "STRING",
+                    "enum": ["continue", "done"],
+                    "description": "Set to 'continue' if there are more issues to fix, or 'done' if you have resolved all issues."
+                }
+            },
+            "required": ["thought", "action_name", "action_args", "justification", "status"]
+        }
+        
+        payload = {
+            "contents": contents,
+            "generationConfig": {
+                "temperature": 0.1,
+                "responseMimeType": "application/json",
+                "responseSchema": schema
+            }
+        }
+        
         max_retries = 5
         for attempt in range(max_retries):
             try:
-                response = llm_with_tools.invoke(messages)
-                
-                if response.tool_calls:
-                    tool_call = response.tool_calls[0]
-                    action_name = tool_call["name"]
-                    action_args = tool_call["args"].copy()
-                    
-                    thought = action_args.pop("thought", response.content or f"Decided to run {action_name}")
-                    justification = action_args.pop("justification", f"Executed {action_name} based on analysis.")
-                    
-                    return {
-                        "thought": thought,
-                        "action_name": action_name,
-                        "action_args": action_args,
-                        "justification": justification,
-                        "status": "done" if action_name == "mark_done" else "continue",
-                        "content": response.content,
-                        "tool_calls": response.tool_calls
-                    }
+                headers = {
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": api_key
+                }
+                response = requests.post(url, json=payload, headers=headers, timeout=60)
+                if response.status_code == 200:
+                    res_json = response.json()
+                    text = res_json['candidates'][0]['content']['parts'][0]['text']
+                    return json.loads(text)
+                elif response.status_code == 429:
+                    sleep_time = (2 ** attempt) + 2
+                    time.sleep(sleep_time)
                 else:
-                    return {
-                        "thought": response.content,
-                        "action_name": "mark_done",
-                        "action_args": {},
-                        "justification": "Model responded with plain text, assuming done.",
-                        "status": "done",
-                        "content": response.content,
-                        "tool_calls": []
-                    }
+                    raise Exception(f"Gemini API returned status code {response.status_code}: {response.text}")
             except Exception as e:
                 if attempt == max_retries - 1:
                     raise e
@@ -403,15 +405,13 @@ class CleaningAgent:
                     time.sleep(2.0)
                     
                     # Feed execution error back to Gemini for self-healing
-                    tool_call_id = agent_response.get("tool_calls", [{"id": "fake_id"}])[0]["id"]
-                    heal_tool_msg = {
-                        "role": "tool",
-                        "content": f"The action '{current_action_name}' failed on attempt {attempt + 1} with error:\n{error_message}\n\nPlease select a correct action or arguments.",
-                        "tool_call_id": tool_call_id
+                    heal_message = {
+                        "role": "user",
+                        "content": f"The action '{current_action_name}' failed on attempt {attempt + 1} with error:\n{error_message}\n\nPlease analyze, select a correct action or arguments, and return a corrected JSON object."
                     }
                     temp_history = self.chat_history.copy()
-                    temp_history.append({"role": "model", "content": agent_response.get("content", ""), "tool_calls": agent_response.get("tool_calls", [])})
-                    temp_history.append(heal_tool_msg)
+                    temp_history.append({"role": "model", "content": json.dumps(agent_response)})
+                    temp_history.append(heal_message)
                     self.chat_history = temp_history
                     
                     agent_response = self._call_gemini()
@@ -453,10 +453,9 @@ class CleaningAgent:
                 self.action_log.append(action_record)
                 
                 if self.mode == "genai":
-                    self.chat_history.append({"role": "model", "content": agent_response.get("content", ""), "tool_calls": agent_response.get("tool_calls", [])})
-                    tool_call_id = agent_response.get("tool_calls", [{"id": "fake_id"}])[0]["id"]
+                    self.chat_history.append({"role": "model", "content": json.dumps(agent_response)})
                     observation = f"Step successful. Action applied. Current dataset shape: {self.df.shape}."
-                    self.chat_history.append({"role": "tool", "content": observation, "tool_call_id": tool_call_id})
+                    self.chat_history.append({"role": "user", "content": observation})
                     
                 yield {
                     "status": "success",
@@ -478,10 +477,9 @@ class CleaningAgent:
                 self.action_log.append(fail_record)
                 
                 if self.mode == "genai":
-                    self.chat_history.append({"role": "model", "content": agent_response.get("content", ""), "tool_calls": agent_response.get("tool_calls", [])})
-                    tool_call_id = agent_response.get("tool_calls", [{"id": "fake_id"}])[0]["id"]
+                    self.chat_history.append({"role": "model", "content": json.dumps(agent_response)})
                     observation = f"Step failed completely after 3 attempts with error: {error_message}. Do NOT repeat this action. Try other issues or set status to 'done'."
-                    self.chat_history.append({"role": "tool", "content": observation, "tool_call_id": tool_call_id})
+                    self.chat_history.append({"role": "user", "content": observation})
                     
                 yield {
                     "status": "failed",
@@ -511,31 +509,31 @@ You are NOT allowed to write raw Python code. You must select one of our pre-def
 
 Supported Actions & Arguments mapping:
 1. `median_imputation`: imputes missing values in a numeric column with its median.
-   Args: {{ "column": "ColName" }}
+   Args: { "column": "ColName" }
 2. `grouped_median_imputation`: imputes missing values in a numeric column using grouped medians from grouping columns.
-   Args: {{ "column": "ColName", "group_cols": ["GrpCol1", "GrpCol2"] }}
+   Args: { "column": "ColName", "group_cols": ["GrpCol1", "GrpCol2"] }
 3. `mode_imputation`: imputes missing values in a categorical column with its mode.
-   Args: {{ "column": "ColName" }}
+   Args: { "column": "ColName" }
 4. `drop_columns`: drops specified columns or columns exceeding a missingness threshold.
-   Args: {{ "columns": ["Col1", "Col2"], "threshold": 0.7 }} (either columns or threshold required)
+   Args: { "columns": ["Col1", "Col2"], "threshold": 0.7 } (either columns or threshold required)
 5. `remove_duplicates`: removes exact duplicate rows based on subset columns.
-   Args: {{ "subset": ["Col1", "Col2"], "keep": "first" }} (optional args)
+   Args: { "subset": ["Col1", "Col2"], "keep": "first" } (optional args)
 6. `normalize_categories`: normalizes variations of labels using fuzzy matches or custom dictionary.
-   Args: {{ "column": "ColName", "mapping": {{"M": "male", "Male": "male"}} }} (mapping is optional)
+   Args: { "column": "ColName", "mapping": {"M": "male", "Male": "male"} } (mapping is optional)
 7. `clamp_iqr_outliers`: clips outliers outside IQR boundaries.
-   Args: {{ "column": "ColName", "multiplier": 1.5 }} (optional multiplier, default is 1.5)
+   Args: { "column": "ColName", "multiplier": 1.5 } (optional multiplier, default is 1.5)
 8. `coerce_numeric`: coerces text columns to numeric, replacing unparseable cells with NaN.
-   Args: {{ "column": "ColName" }}
+   Args: { "column": "ColName" }
 9. `coerce_boolean`: standardizes yes/no, true/false, 1/0 columns to standard integers [0, 1].
-   Args: {{ "column": "ColName" }}
+   Args: { "column": "ColName" }
 10. `drop_constant_columns`: drops zero-variance/constant columns.
-    Args: {{}}
+    Args: {}
 11. `clamp_negative_values`: clamps negative numeric values to 0.0.
-    Args: {{ "column": "ColName" }}
+    Args: { "column": "ColName" }
 12. `fill_placeholders`: fills remaining missing values in a column with a static placeholder.
-    Args: {{ "column": "ColName", "placeholder": "Unknown" }}
+    Args: { "column": "ColName", "placeholder": "Unknown" }
 13. `replace_invalid_values`: replaces values not in an allowed list or outside numeric range bounds with NaN or fallback.
-    Args: {{ "column": "ColName", "allowed_values": ["0", "1"], "min_val": 0, "max_val": 120, "replace_with": null }} (allowed_values, min_val, max_val are optional)
+    Args: { "column": "ColName", "allowed_values": ["0", "1"], "min_val": 0, "max_val": 120, "replace_with": null } (allowed_values, min_val, max_val are optional)
 
 Rules of Operation:
 1. Every step must be atomic. Focus on one issue or column per step.

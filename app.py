@@ -874,7 +874,7 @@ else:
         # A. Hero Score Card
         sv = profile['overall_score']
         sc = score_color(sv)
-        st.markdown('''
+        st.markdown(f'''
         <div class="glass-card score-hero" style="text-align:center; border: 1px solid {sc}22; box-shadow: 0 0 40px {sc}10; margin-bottom: 28px; padding: 32px 20px;">
             <p style="color: #5C6370; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; font-weight: 600;">Overall Data Quality Score</p>
             <div style="font-size: 4.5rem; color: {sc}; font-family: 'Inter'; font-weight: 900; margin: 0; line-height: 1; letter-spacing: -0.03em;">{sv:.1f}<span style="font-size:2rem; opacity:0.7;">%</span></div>
@@ -883,7 +883,7 @@ else:
                 <div style="width:{sv}%; height:100%; background:linear-gradient(90deg, {sc}, {sc}AA); border-radius:6px; transition: width 1s ease;"></div>
             </div>
         </div>
-        '''.format(sc=sc, sv=sv), unsafe_allow_html=True)
+        ''', unsafe_allow_html=True)
 
         # B. 6 Dimension Cards + Radar
         col_dims, col_radar = st.columns([1.1, 0.9])
@@ -1004,23 +1004,17 @@ else:
             for rec in recs[:10]:
                 pc = {'High': '#FF7675', 'Medium': '#FFC048', 'Low': '#5C6370'}.get(rec.get('priority', 'Low'), '#5C6370')
                 bc = {'High': 'high', 'Medium': 'medium', 'Low': 'low'}.get(rec.get('priority', 'Low'), 'low')
-                icon = rec.get('icon', '\U0001f4a1')
-                col_name = rec.get('column', '')
-                action_name = rec.get('action', '')
-                priority = rec.get('priority', 'Low')
-                reason = rec.get('reason', '')
-                
                 st.markdown(f'''
                 <div class="glass-card" style="padding:12px 16px; margin-bottom:8px; border-left:3px solid {pc};">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div style="display:flex; align-items:center; gap:10px;">
-                            <span style="font-size:1.1rem;">{icon}</span>
-                            <strong style="color:var(--text-primary); font-size:0.88rem;">{col_name}</strong>
-                            <span style="color:#00D4C8; font-size:0.82rem; font-weight:500;">{action_name}</span>
+                            <span style="font-size:1.1rem;">{rec.get('icon', '\U0001f4a1')}</span>
+                            <strong style="color:var(--text-primary); font-size:0.88rem;">{rec.get('column', '')}</strong>
+                            <span style="color:#00D4C8; font-size:0.82rem; font-weight:500;">{rec.get('action', '')}</span>
                         </div>
-                        <span class="badge badge-{bc}">{priority}</span>
+                        <span class="badge badge-{bc}">{rec.get('priority', 'Low')}</span>
                     </div>
-                    <p style="color:#5C6370; font-size:0.78rem; margin:4px 0 0 36px;">{reason}</p>
+                    <p style="color:#5C6370; font-size:0.78rem; margin:4px 0 0 36px;">{rec.get('reason', '')}</p>
                 </div>
                 ''', unsafe_allow_html=True)
             st.markdown("<hr>", unsafe_allow_html=True)
