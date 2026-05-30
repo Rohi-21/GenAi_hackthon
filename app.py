@@ -1590,7 +1590,7 @@ else:
             st.markdown('''<div class="section-header"><div class="accent-dot" style="background:#00D4C8;"></div><h3>Export Reports</h3></div>''', unsafe_allow_html=True)
 
             comp = st.session_state.comparison
-            ce1, ce2, ce3 = st.columns(2)
+            ce1, ce2, ce3 = st.columns(3)
             with ce1:
                 metadata = {
                     'overall_before': comp['overall_before'],
