@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# DataCleanAgent session persistence & Parquet snapshots
+data/sessions/
+*.parquet
+*.db
+
+# Streamlit configurations
+.streamlit/
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ZIP packages
+*.zip
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
