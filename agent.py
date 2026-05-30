@@ -81,7 +81,7 @@ class CleaningAgent:
         if not api_key:
             raise ValueError("GOOGLE_API_KEY environment variable is missing. Please configure it in the sidebar.")
             
-        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent"
         
         contents = []
         for msg in self.chat_history:
@@ -105,7 +105,57 @@ class CleaningAgent:
                 },
                 "action_args": {
                     "type": "OBJECT",
-                    "description": "JSON object with keys matching the required arguments for the action. CRITICAL: You must replace placeholders with actual column names from the dataset. For example, for 'median_imputation' or 'mode_imputation', use {'column': 'Age'}. For 'drop_columns', use {'columns': ['Cabin']} (must contain actual column names inside the list, never empty list). For 'clamp_iqr_outliers', use {'column': 'Fare', 'multiplier': 3.0}."
+                    "properties": {
+                        "column": {
+                            "type": "STRING",
+                            "description": "The name of a single target column (e.g., 'Age', 'Fare', 'Sex', 'Survived')."
+                        },
+                        "columns": {
+                            "type": "ARRAY",
+                            "items": {"type": "STRING"},
+                            "description": "A list of target column names (e.g., ['Cabin']). Never output an empty list."
+                        },
+                        "group_cols": {
+                            "type": "ARRAY",
+                            "items": {"type": "STRING"},
+                            "description": "Grouping columns used for median imputation (e.g., ['Pclass', 'Sex'])."
+                        },
+                        "threshold": {
+                            "type": "NUMBER",
+                            "description": "Missingness threshold for dropping columns, between 0.0 and 1.0."
+                        },
+                        "subset": {
+                            "type": "ARRAY",
+                            "items": {"type": "STRING"},
+                            "description": "Subset of columns to look at for duplicate rows (e.g., ['PassengerId'])."
+                        },
+                        "keep": {
+                            "type": "STRING",
+                            "description": "Standard keep policy for duplicate removal: 'first', 'last', or false."
+                        },
+                        "multiplier": {
+                            "type": "NUMBER",
+                            "description": "IQR multiplier for outlier clamping (e.g., 1.5 or 3.0)."
+                        },
+                        "placeholder": {
+                            "type": "STRING",
+                            "description": "The static placeholder value to fill in remaining nulls (e.g., 'Unknown')."
+                        },
+                        "allowed_values": {
+                            "type": "ARRAY",
+                            "items": {"type": "STRING"},
+                            "description": "List of allowed categorical values for validation (e.g., ['0', '1'])."
+                        },
+                        "min_val": {
+                            "type": "NUMBER",
+                            "description": "Minimum valid range bound for validation (e.g., 0)."
+                        },
+                        "max_val": {
+                            "type": "NUMBER",
+                            "description": "Maximum valid range bound for validation (e.g., 120)."
+                        }
+                    },
+                    "description": "Arguments matching the selected registered action. Only populate the keys required for the chosen action."
                 },
                 "justification": {
                     "type": "STRING",
