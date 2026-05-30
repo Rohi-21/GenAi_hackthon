@@ -780,7 +780,7 @@ if st.session_state.df is None:
 
     col_l, col_m, col_r = st.columns([1.1, 1.8, 1.1])
     with col_m:
-        st.image("data/hero.png", use_container_width=True)
+        st.image("data/hero.png", use_column_width=True)
 
     # Feature cards
     st.markdown('<div style="height:32px;"></div>', unsafe_allow_html=True)
