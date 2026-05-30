@@ -105,7 +105,7 @@ class CleaningAgent:
                 },
                 "action_args": {
                     "type": "OBJECT",
-                    "description": "Arguments corresponding to the selected action (e.g. column, columns, group_cols, mapping, etc.)."
+                    "description": "JSON object with keys matching the required arguments for the action. CRITICAL: You must replace placeholder values like 'ColName', 'Col1', 'GrpCol1' with actual column names from the dataset (e.g., {'column': 'Price'} or {'column': 'Age'}). Do NOT output literal string 'column' or 'ColName' as the column value."
                 },
                 "justification": {
                     "type": "STRING",
@@ -509,31 +509,31 @@ You are NOT allowed to write raw Python code. You must select one of our pre-def
 
 Supported Actions & Arguments mapping:
 1. `median_imputation`: imputes missing values in a numeric column with its median.
-   Args: {{ "column": "ColName" }}
+   Args: { "column": "ColName" }
 2. `grouped_median_imputation`: imputes missing values in a numeric column using grouped medians from grouping columns.
-   Args: {{ "column": "ColName", "group_cols": ["GrpCol1", "GrpCol2"] }}
+   Args: { "column": "ColName", "group_cols": ["GrpCol1", "GrpCol2"] }
 3. `mode_imputation`: imputes missing values in a categorical column with its mode.
-   Args: {{ "column": "ColName" }}
+   Args: { "column": "ColName" }
 4. `drop_columns`: drops specified columns or columns exceeding a missingness threshold.
-   Args: {{ "columns": ["Col1", "Col2"], "threshold": 0.7 }} (either columns or threshold required)
+   Args: { "columns": ["Col1", "Col2"], "threshold": 0.7 } (either columns or threshold required)
 5. `remove_duplicates`: removes exact duplicate rows based on subset columns.
-   Args: {{ "subset": ["Col1", "Col2"], "keep": "first" }} (optional args)
+   Args: { "subset": ["Col1", "Col2"], "keep": "first" } (optional args)
 6. `normalize_categories`: normalizes variations of labels using fuzzy matches or custom dictionary.
-   Args: {{ "column": "ColName", "mapping": {{"M": "male", "Male": "male"}} }} (mapping is optional)
+   Args: { "column": "ColName", "mapping": {"M": "male", "Male": "male"} } (mapping is optional)
 7. `clamp_iqr_outliers`: clips outliers outside IQR boundaries.
-   Args: {{ "column": "ColName", "multiplier": 1.5 }} (optional multiplier, default is 1.5)
+   Args: { "column": "ColName", "multiplier": 1.5 } (optional multiplier, default is 1.5)
 8. `coerce_numeric`: coerces text columns to numeric, replacing unparseable cells with NaN.
-   Args: {{ "column": "ColName" }}
+   Args: { "column": "ColName" }
 9. `coerce_boolean`: standardizes yes/no, true/false, 1/0 columns to standard integers [0, 1].
-   Args: {{ "column": "ColName" }}
+   Args: { "column": "ColName" }
 10. `drop_constant_columns`: drops zero-variance/constant columns.
-    Args: {{}}
+    Args: {}
 11. `clamp_negative_values`: clamps negative numeric values to 0.0.
-    Args: {{ "column": "ColName" }}
+    Args: { "column": "ColName" }
 12. `fill_placeholders`: fills remaining missing values in a column with a static placeholder.
-    Args: {{ "column": "ColName", "placeholder": "Unknown" }}
+    Args: { "column": "ColName", "placeholder": "Unknown" }
 13. `replace_invalid_values`: replaces values not in an allowed list or outside numeric range bounds with NaN or fallback.
-    Args: {{ "column": "ColName", "allowed_values": ["0", "1"], "min_val": 0, "max_val": 120, "replace_with": null }} (allowed_values, min_val, max_val are optional)
+    Args: { "column": "ColName", "allowed_values": ["0", "1"], "min_val": 0, "max_val": 120, "replace_with": null } (allowed_values, min_val, max_val are optional)
 
 Rules of Operation:
 1. Every step must be atomic. Focus on one issue or column per step.
