@@ -124,3 +124,62 @@ def save_dirty_titanic(file_path: str, n_records: int = 200) -> None:
     import os
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
     df.to_csv(file_path, index=False)
+
+def generate_dirty_adult(n_records: int = 500) -> pd.DataFrame:
+    np.random.seed(42)
+    data = {
+        'age': np.random.normal(38, 13, n_records).round(0),
+        'workclass': np.random.choice(['Private', 'Self-emp-not-inc', 'Local-gov', '?', 'State-gov'], n_records),
+        'fnlwgt': np.random.randint(20000, 500000, n_records),
+        'education': np.random.choice(['Bachelors', 'Some-college', '11th', 'HS-grad', 'Prof-school'], n_records),
+        'education.num': np.random.choice([9, 10, 13, 14], n_records),
+        'marital.status': np.random.choice(['Married-civ-spouse', 'Divorced', 'Never-married'], n_records),
+        'occupation': np.random.choice(['Tech-support', 'Craft-repair', 'Other-service', 'Sales', '?'], n_records),
+        'relationship': np.random.choice(['Wife', 'Own-child', 'Husband', 'Not-in-family'], n_records),
+        'race': np.random.choice(['White', 'Asian-Pac-Islander', 'Amer-Indian-Eskimo', 'Other', 'Black'], n_records),
+        'sex': np.random.choice(['Female', 'Male', 'F', 'M', 'm', 'f'], n_records),
+        'capital.gain': np.random.exponential(1000, n_records).round(0),
+        'capital.loss': np.random.exponential(50, n_records).round(0),
+        'hours.per.week': np.random.normal(40, 10, n_records).round(0),
+        'native.country': np.random.choice(['United-States', 'Cambodia', 'England', '?', 'Mexico'], n_records),
+        'income': np.random.choice(['<=50K', '>50K', '<=50k', '>50k', '50k+'], n_records)
+    }
+    df = pd.DataFrame(data)
+    # Inject errors
+    df.loc[5, 'age'] = -10
+    df.loc[10, 'age'] = 200
+    df.loc[20, 'income'] = np.nan
+    df.loc[30:35, 'capital.gain'] = "NULL"
+    return df
+
+def generate_dirty_rein(n_records: int = 300) -> pd.DataFrame:
+    np.random.seed(42)
+    data = {
+        'id': list(range(n_records)),
+        'title': [f"Item {i}" for i in range(n_records)],
+        'price': np.random.uniform(5.0, 500.0, n_records).round(2),
+        'category': np.random.choice(['Electronics', 'Books', 'Clothing', 'Home', 'unknown'], n_records),
+        'rating': np.random.uniform(1.0, 5.0, n_records).round(1)
+    }
+    df = pd.DataFrame(data)
+    df.loc[0:10, 'rating'] = 9.9
+    df.loc[15, 'price'] = -50
+    df.loc[20:25, 'title'] = np.nan
+    df.loc[30, 'category'] = "Elec"
+    return df
+
+def generate_dirty_openrefine(n_records: int = 250) -> pd.DataFrame:
+    np.random.seed(42)
+    data = {
+        'Record_ID': list(range(n_records)),
+        'Company_Name': [f"Corp {i}" for i in range(n_records)],
+        'Date_Founded': [f"19{random.randint(50,99)}-0{random.randint(1,9)}-1{random.randint(0,9)}" for _ in range(n_records)],
+        'Revenue': np.random.randint(10000, 999999, n_records),
+        'Employees': np.random.randint(10, 5000, n_records)
+    }
+    df = pd.DataFrame(data)
+    df.loc[1, 'Company_Name'] = df.loc[0, 'Company_Name']
+    df.loc[5, 'Employees'] = -10
+    df.loc[8, 'Date_Founded'] = "Unknown"
+    return df
+

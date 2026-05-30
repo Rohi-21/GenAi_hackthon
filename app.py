@@ -12,7 +12,7 @@ import time
 
 # Import custom modules
 from utils import smart_load_csv, normalize_sentinels
-from sample_data import generate_dirty_titanic
+from sample_data import generate_dirty_titanic, generate_dirty_adult, generate_dirty_rein, generate_dirty_openrefine
 from profiler import profile_dataset, compare_profiles
 from agent import CleaningAgent
 from report_generator import generate_docx_report
@@ -645,7 +645,14 @@ if 'session_store' in st.session_state:
 st.sidebar.markdown('<p style="color: var(--text-primary); font-weight: 600; font-size: 0.82rem; margin-bottom: 4px;">\U0001f4c1 Data Source</p>', unsafe_allow_html=True)
 data_source = st.sidebar.selectbox(
     "Choose Data Ingestion Method:",
-    ["Upload CSV File", "Use Titanic Survival Dataset (Kaggle)", "Use Synthetic Messy Dataset"],
+    [
+        "Upload CSV File", 
+        "Use Titanic Survival Dataset (Kaggle)", 
+        "Use UCI Adult Income Dataset",
+        "Use Dirty Data Challenge Dataset (REIN)",
+        "Use OpenRefine Test Dataset",
+        "Use Synthetic Messy Dataset"
+    ],
     label_visibility="collapsed"
 )
 
@@ -669,6 +676,21 @@ else:
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp:
                     dirty_df.to_csv(tmp.name, index=False)
                     loaded_file = tmp.name
+        elif data_source == "Use UCI Adult Income Dataset":
+            dirty_df = generate_dirty_adult(500)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp:
+                dirty_df.to_csv(tmp.name, index=False)
+                loaded_file = tmp.name
+        elif data_source == "Use Dirty Data Challenge Dataset (REIN)":
+            dirty_df = generate_dirty_rein(300)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp:
+                dirty_df.to_csv(tmp.name, index=False)
+                loaded_file = tmp.name
+        elif data_source == "Use OpenRefine Test Dataset":
+            dirty_df = generate_dirty_openrefine(250)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp:
+                dirty_df.to_csv(tmp.name, index=False)
+                loaded_file = tmp.name
         else:
             dirty_df = generate_dirty_titanic(200)
             with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp:
