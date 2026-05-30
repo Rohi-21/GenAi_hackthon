@@ -1648,8 +1648,8 @@ else:
                 script_lines.append("    # cleaned_df = clean_data(df)")
                 script_lines.append("    # cleaned_df.to_csv('cleaned_data.csv', index=False)")
                 
-                py_script = "\\n".join(script_lines)
-                st.download_button('\ud83d\udc0d Python Script', data=py_script, file_name='cleaning_script.py', mime='text/plain', use_container_width=True)
+                py_script = "\n".join(script_lines)
+                st.download_button('🐍 Python Script', data=py_script, file_name='cleaning_script.py', mime='text/plain', use_container_width=True)
 
             if 'docx_bytes' in st.session_state:
                 st.download_button(

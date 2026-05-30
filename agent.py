@@ -105,7 +105,7 @@ class CleaningAgent:
                 },
                 "action_args": {
                     "type": "OBJECT",
-                    "description": "JSON object with keys matching the required arguments for the action. CRITICAL: You must replace placeholder values like 'ColName', 'Col1', 'GrpCol1' with actual column names from the dataset (e.g., {'column': 'Price'} or {'column': 'Age'}). Do NOT output literal string 'column' or 'ColName' as the column value."
+                    "description": "JSON object with keys matching the required arguments for the action. CRITICAL: You must replace placeholders with actual column names from the dataset. For example, for 'median_imputation' or 'mode_imputation', use {'column': 'Age'}. For 'drop_columns', use {'columns': ['Cabin']} (must contain actual column names inside the list, never empty list). For 'clamp_iqr_outliers', use {'column': 'Fare', 'multiplier': 3.0}."
                 },
                 "justification": {
                     "type": "STRING",
@@ -501,7 +501,7 @@ class CleaningAgent:
         for name, instance in ACTION_REGISTRY.items():
             actions_desc += f"- **{name}**: {instance.__doc__.strip()}\n"
             
-        return rf"""You are the AI brain of DataCleanAgent, a production-grade autonomous data cleaning system.
+        template = r"""You are the AI brain of DataCleanAgent, a production-grade autonomous data cleaning system.
 Your goal is to inspect a statistical profile and sample of a dataset, reason about quality defects, and select the optimal deterministic action from our registered suite.
 
 You are NOT allowed to write raw Python code. You must select one of our pre-defined registered actions:
@@ -509,40 +509,43 @@ You are NOT allowed to write raw Python code. You must select one of our pre-def
 
 Supported Actions & Arguments mapping:
 1. `median_imputation`: imputes missing values in a numeric column with its median.
-   Args: {{ "column": "ColName" }}
+   Args: { "column": "ColName" }
 2. `grouped_median_imputation`: imputes missing values in a numeric column using grouped medians from grouping columns.
-   Args: {{ "column": "ColName", "group_cols": ["GrpCol1", "GrpCol2"] }}
+   Args: { "column": "ColName", "group_cols": ["GrpCol1", "GrpCol2"] }
 3. `mode_imputation`: imputes missing values in a categorical column with its mode.
-   Args: {{ "column": "ColName" }}
+   Args: { "column": "ColName" }
 4. `drop_columns`: drops specified columns or columns exceeding a missingness threshold.
-   Args: {{ "columns": ["Col1", "Col2"], "threshold": 0.7 }} (either columns or threshold required)
+   Args: { "columns": ["ColName1", "ColName2"] } or { "threshold": 0.7 } (at least one of 'columns' list or 'threshold' must be specified. For example, if you want to drop 'Cabin', specify: { "columns": ["Cabin"] })
 5. `remove_duplicates`: removes exact duplicate rows based on subset columns.
-   Args: {{ "subset": ["Col1", "Col2"], "keep": "first" }} (optional args)
+   Args: { "subset": ["ColName1", "ColName2"], "keep": "first" } (subset and keep are optional)
 6. `normalize_categories`: normalizes variations of labels using fuzzy matches or custom dictionary.
-   Args: {{ "column": "ColName", "mapping": {{"M": "male", "Male": "male"}} }} (mapping is optional)
+   Args: { "column": "ColName", "mapping": {"M": "male", "Male": "male"} } (mapping is optional)
 7. `clamp_iqr_outliers`: clips outliers outside IQR boundaries.
-   Args: {{ "column": "ColName", "multiplier": 1.5 }} (optional multiplier, default is 1.5)
+   Args: { "column": "ColName", "multiplier": 1.5 } (optional multiplier, default is 1.5)
 8. `coerce_numeric`: coerces text columns to numeric, replacing unparseable cells with NaN.
-   Args: {{ "column": "ColName" }}
+   Args: { "column": "ColName" }
 9. `coerce_boolean`: standardizes yes/no, true/false, 1/0 columns to standard integers [0, 1].
-   Args: {{ "column": "ColName" }}
+   Args: { "column": "ColName" }
 10. `drop_constant_columns`: drops zero-variance/constant columns.
-    Args: {{}}
+    Args: {}
 11. `clamp_negative_values`: clamps negative numeric values to 0.0.
-    Args: {{ "column": "ColName" }}
+    Args: { "column": "ColName" }
 12. `fill_placeholders`: fills remaining missing values in a column with a static placeholder.
-    Args: {{ "column": "ColName", "placeholder": "Unknown" }}
+    Args: { "column": "ColName", "placeholder": "Unknown" }
 13. `replace_invalid_values`: replaces values not in an allowed list or outside numeric range bounds with NaN or fallback.
-    Args: {{ "column": "ColName", "allowed_values": ["0", "1"], "min_val": 0, "max_val": 120, "replace_with": null }} (allowed_values, min_val, max_val are optional)
+    Args: { "column": "ColName", "allowed_values": ["0", "1"], "min_val": 0, "max_val": 120, "replace_with": null } (allowed_values, min_val, max_val are optional)
 
 Rules of Operation:
 1. Every step must be atomic. Focus on one issue or column per step.
 2. Select actions that resolve issues identified in the "detected_issues" log.
 3. Use `replace_invalid_values` to handle categorical values out of range (like Survived not in [0,1] or Pclass not in [1,2,3]) or numeric values out of logical bounds (like Age > 120 or Age < 0) before running imputer steps.
 4. When you believe the dataset has been fully cleaned (all missingness, duplicates, outliers, inconsistencies, invalid values resolved), set 'status' to 'done' and 'action_name' to 'remove_duplicates'.
+5. Never output empty lists `[]` for `columns` argument in `drop_columns` if you intend to drop specific columns. You must include the actual column name string(s) inside the list, e.g., `{"columns": ["Cabin"]}`.
+6. For all list arguments like `columns` or `subset`, you must provide a list containing actual column names from the dataset.
 
 Your response must be a JSON object adhering to the schema. Keep thoughts concise and justifications clear.
 """
+        return template.replace("{actions_desc}", actions_desc)
 
     def _get_initial_observation(self) -> str:
         """Serializes the dataset profile and sample data into a compact text format for the Gemini context window."""
